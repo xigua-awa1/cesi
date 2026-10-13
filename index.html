@@ -15,6 +15,7 @@
             color: #ffffff;
             font-family: system-ui, sans-serif;
             min-height: 100vh;
+            overflow-x:hidden;
         }
         nav {
             background-color: #1f1f1f;
@@ -49,6 +50,15 @@
             margin-top: 120px;
             color:#bbbbbb;
         }
+
+        /* 蟑螂 */
+        .cockroach{
+            position:fixed;
+            z-index:999;
+            font-size:28px;
+            user-select:none;
+            pointer-events:none;
+        }
     </style>
 </head>
 <body>
@@ -59,25 +69,21 @@
         <a data-page="euus">欧美</a>
     </nav>
     <div class="container">
-        <!-- 首页，主体空白 -->
         <div id="home" class="page active">
-
         </div>
-        <!-- 国产 -->
         <div id="cn" class="page">
-            <div class="tip-text">你还真看啊兄dei</div>
+            <div class="tip-text">你还真看啊</div>
         </div>
-        <!-- 日韩 -->
         <div id="jpkr" class="page">
-            <div class="tip-text">你还真看啊兄dei</div>
+            <div class="tip-text">你还真看啊</div>
         </div>
-        <!-- 欧美 -->
         <div id="euus" class="page">
-            <div class="tip-text">你还真看啊兄dei</div>
+            <div class="tip-text">你还真看啊</div>
         </div>
     </div>
 
 <script>
+//页面切换
 const pageList = document.querySelectorAll('.page');
 function showPage(pageId) {
     pageList.forEach(p => p.classList.remove('active'));
@@ -88,6 +94,41 @@ document.querySelectorAll('nav a').forEach(item=>{
         showPage(item.dataset.page);
     })
 })
+
+//蟑螂爬行动画 🪳
+const count = 12;
+const roaches = [];
+for(let i=0;i<count;i++){
+    const el = document.createElement("div");
+    el.className = "cockroach";
+    el.innerText = "🪳";
+    document.body.appendChild(el);
+    roaches.push({
+        dom:el,
+        x:Math.random() * window.innerWidth,
+        y:Math.random() * window.innerHeight,
+        vx:(Math.random()-0.5)*2.2,
+        vy:(Math.random()-0.5)*2.2
+    })
+}
+
+function loopRoach(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    for(let r of roaches){
+        r.x += r.vx;
+        r.y += r.vy;
+        //边界反弹
+        if(r.x <0 || r.x> w-30) r.vx *= -1;
+        if(r.y <0 || r.y> h-30) r.vy *= -1;
+        r.dom.style.left = r.x + "px";
+        r.dom.style.top = r.y + "px";
+        //左右翻转模拟朝向
+        r.dom.style.transform = r.vx>0 ? "scaleX(1)" : "scaleX(-1)";
+    }
+    requestAnimationFrame(loopRoach);
+}
+loopRoach();
 </script>
 </body>
 </html>
