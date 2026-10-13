@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>演示站点</title>
+    <title>蟑螂</title>
     <style>
         * {
             margin: 0;
@@ -11,47 +11,10 @@
             box-sizing: border-box;
         }
         body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: system-ui, sans-serif;
-            min-height: 100vh;
-            overflow-x:hidden;
+            background:#000;
+            min-height:100vh;
+            overflow:hidden;
         }
-        nav {
-            background-color: #1f1f1f;
-            padding: 16px;
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-        nav a {
-            color: #42a5f5;
-            text-decoration: none;
-            font-size: 17px;
-            cursor: pointer;
-        }
-        nav a:hover {
-            color: #ffca28;
-        }
-        .container {
-            padding: 40px 20px;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-        .tip-text {
-            font-size: 24px;
-            text-align: center;
-            margin-top: 120px;
-            color:#bbbbbb;
-        }
-
-        /* 蟑螂 */
         .cockroach{
             position:fixed;
             z-index:999;
@@ -62,40 +25,7 @@
     </style>
 </head>
 <body>
-    <nav>
-        <a data-page="home">首页</a>
-        <a data-page="cn">国产</a>
-        <a data-page="jpkr">日韩</a>
-        <a data-page="euus">欧美</a>
-    </nav>
-    <div class="container">
-        <div id="home" class="page active">
-        </div>
-        <div id="cn" class="page">
-            <div class="tip-text">你还真看啊</div>
-        </div>
-        <div id="jpkr" class="page">
-            <div class="tip-text">你还真看啊</div>
-        </div>
-        <div id="euus" class="page">
-            <div class="tip-text">你还真看啊</div>
-        </div>
-    </div>
-
 <script>
-//页面切换
-const pageList = document.querySelectorAll('.page');
-function showPage(pageId) {
-    pageList.forEach(p => p.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-}
-document.querySelectorAll('nav a').forEach(item=>{
-    item.addEventListener('click', ()=>{
-        showPage(item.dataset.page);
-    })
-})
-
-//蟑螂爬行动画 🪳
 const count = 12;
 const roaches = [];
 for(let i=0;i<count;i++){
@@ -118,12 +48,10 @@ function loopRoach(){
     for(let r of roaches){
         r.x += r.vx;
         r.y += r.vy;
-        //边界反弹
         if(r.x <0 || r.x> w-30) r.vx *= -1;
         if(r.y <0 || r.y> h-30) r.vy *= -1;
         r.dom.style.left = r.x + "px";
         r.dom.style.top = r.y + "px";
-        //左右翻转模拟朝向
         r.dom.style.transform = r.vx>0 ? "scaleX(1)" : "scaleX(-1)";
     }
     requestAnimationFrame(loopRoach);
