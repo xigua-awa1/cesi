@@ -3,463 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5合1网页小游戏合集</title>
+    <title>演示站点</title>
     <style>
-        * {margin:0;padding:0;box-sizing:border-box;font-family:system-ui, sans-serif;}
-        body {background:#1a1a2e;color:#fff;min-height:100vh;}
-
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: system-ui, sans-serif;
+            min-height: 100vh;
+        }
         nav {
-            background:#16213e;
-            padding:12px 16px;
-            display:flex;
-            gap:16px;
+            background-color: #1f1f1f;
+            padding: 16px;
+            display: flex;
+            gap: 24px;
             flex-wrap: wrap;
         }
         nav a {
-            color:#4fc3f7;
-            text-decoration:none;
-            font-size:16px;
-            cursor:pointer;
+            color: #42a5f5;
+            text-decoration: none;
+            font-size: 17px;
+            cursor: pointer;
         }
-        nav a:hover {color:#ffeb3b;}
-
-        .container {padding:16px;max-width:620px;margin:0 auto;}
-        .page {display:none;}
-        .page.active {display:block;}
-
-        /* 首页 */
-        #home h1 {font-size:28px;margin-bottom:24px;text-align:center;color:#4fc3f7;}
-        .menu-btn {
-            display:block;
-            width:100%;
-            padding:14px;
-            margin:10px 0;
-            font-size:17px;
-            background:#0f3460;
-            color:#fff;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
+        nav a:hover {
+            color: #ffca28;
         }
-        .menu-btn:hover {background:#4fc3f7;color:#000;}
-
-        /* 游戏通用 */
-        .game-wrap {text-align:center;}
-        canvas {border:2px solid #4fc3f7;background:#000;max-width:100%;height:auto;}
-        .tip {margin:10px 0;color:#aaa;font-size:14px;}
-        .score-text {font-size:18px;margin:8px 0;}
-
-        /* 2048方块样式 */
-        #grid2048 {
-            display:grid;
-            grid-template-columns:repeat(4, 1fr);
-            gap:8px;
-            max-width:320px;
-            margin:12px auto;
-            background:#222;
-            padding:8px;
-            border-radius:6px;
+        .container {
+            padding: 40px 20px;
+            max-width: 700px;
+            margin: 0 auto;
         }
-        .cell {
-            aspect-ratio:1/1;
-            background:#333;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:bold;
-            font-size:22px;
-            border-radius:4px;
+        .page {
+            display: none;
         }
-        #about h2 {margin-bottom:16px;color:#4fc3f7;}
-        #about p {line-height:1.7;color:#ccc;margin:6px 0;}
+        .page.active {
+            display: block;
+        }
+        .tip-text {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 120px;
+            color:#bbbbbb;
+        }
     </style>
 </head>
 <body>
     <nav>
-        <a data-page="home">🏠首页</a>
-        <a data-page="brick-page">🧱打砖块</a>
-        <a data-page="snake-page">🐍贪吃蛇</a>
-        <a data-page="page2048">🔢2048</a>
-        <a data-page="catch-page">🥎接球</a>
-        <a data-page="match-page">💥消方块</a>
-        <a data-page="about">ℹ️关于</a>
+        <a data-page="home">首页</a>
+        <a data-page="cn">国产</a>
+        <a data-page="jpkr">日韩</a>
+        <a data-page="euus">欧美</a>
     </nav>
-
     <div class="container">
-        <!-- 首页 -->
+        <!-- 首页，主体空白 -->
         <div id="home" class="page active">
-            <h1>5合1小游戏合集</h1>
-            <button class="menu-btn" data-goto="brick-page">🧱 打砖块</button>
-            <button class="menu-btn" data-goto="snake-page">🐍 贪吃蛇</button>
-            <button class="menu-btn" data-goto="page2048">🔢 2048</button>
-            <button class="menu-btn" data-goto="catch-page">🥎 接球</button>
-            <button class="menu-btn" data-goto="match-page">💥 消方块</button>
-            <button class="menu-btn" data-goto="about">ℹ️ 关于项目</button>
-        </div>
 
-        <!--1 打砖块-->
-        <div id="brick-page" class="page">
-            <div class="game-wrap">
-                <div class="score-text">分数：<span id="brick-score">0</span></div>
-                <canvas id="brick-canvas" width="480" height="320"></canvas>
-                <div class="tip">电脑：←→方向键｜手机：画面滑动</div>
-            </div>
         </div>
-
-        <!--2 贪吃蛇-->
-        <div id="snake-page" class="page">
-            <div class="game-wrap">
-                <div class="score-text">分数：<span id="snake-score">0</span></div>
-                <canvas id="snake-canvas" width="400" height="400"></canvas>
-                <div class="tip">电脑：方向键｜手机：滑动画布</div>
-            </div>
+        <!-- 国产 -->
+        <div id="cn" class="page">
+            <div class="tip-text">你还真看啊兄dei</div>
         </div>
-
-        <!--3 2048-->
-        <div id="page2048" class="page">
-            <div class="game-wrap">
-                <div class="score-text">分数：<span id="score2048">0</span></div>
-                <div id="grid2048"></div>
-                <div class="tip">电脑：上下左右｜手机：滑动屏幕</div>
-                <button class="menu-btn" style="max-width:200px;margin:8px auto" id="reset2048">重新开始</button>
-            </div>
+        <!-- 日韩 -->
+        <div id="jpkr" class="page">
+            <div class="tip-text">你还真看啊兄dei</div>
         </div>
-
-        <!--4 接球游戏-->
-        <div id="catch-page" class="page">
-            <div class="game-wrap">
-                <div class="score-text">分数：<span id="catch-score">0</span></div>
-                <canvas id="catch-canvas" width="420" height="360"></canvas>
-                <div class="tip">电脑←→｜手机滑动挡板接住下落小球</div>
-            </div>
-        </div>
-
-        <!--5 消方块-->
-        <div id="match-page" class="page">
-            <div class="game-wrap">
-                <div class="score-text">分数：<span id="match-score">0</span></div>
-                <canvas id="match-canvas" width="420" height="380"></canvas>
-                <div class="tip">点击相邻同色方块消除</div>
-            </div>
-        </div>
-
-        <!--关于-->
-        <div id="about" class="page">
-            <h2>小游戏合集</h2>
-            <p>一共5个小游戏，纯HTML+JS，无需服务器。</p>
-            <p>电脑键盘操作，手机触屏滑动游玩。</p>
-            <p>保存为 index.html，浏览器打开即可。</p>
+        <!-- 欧美 -->
+        <div id="euus" class="page">
+            <div class="tip-text">你还真看啊兄dei</div>
         </div>
     </div>
 
 <script>
-// 页面切换
-const pageList = document.querySelectorAll(".page");
-function showPage(pid){
-    pageList.forEach(p=>p.classList.remove("active"));
-    document.getElementById(pid).classList.add("active");
+const pageList = document.querySelectorAll('.page');
+function showPage(pageId) {
+    pageList.forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
 }
-document.querySelectorAll("nav a").forEach(n=>{
-    n.onclick=()=>showPage(n.dataset.page);
+document.querySelectorAll('nav a').forEach(item=>{
+    item.addEventListener('click', ()=>{
+        showPage(item.dataset.page);
+    })
 })
-document.querySelectorAll(".menu-btn[data-goto]").forEach(b=>{
-    b.onclick=()=>showPage(b.dataset.goto);
-})
-
-// =====================游戏1：打砖块=====================
-{
-const canvas = document.getElementById("brick-canvas");
-const ctx = canvas.getContext("2d");
-const scoreDom = document.getElementById("brick-score");
-const paddle={w:80,h:12,x:canvas.width/2-40,y:canvas.height-20,speed:7};
-const ball={r:8,x:canvas.width/2,y:canvas.height/2,dx:4,dy:-4};
-let blocks=[];
-const bw=45,bh=20,rows=4,cols=9;
-let score=0;
-function initBlocks(){
-    blocks=[];
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-        blocks.push({x:c*(bw+4)+10,y:r*(bh+4)+10,w:bw,h:bh,alive:true});
-    }
-}
-const keys={};
-document.addEventListener("keydown",e=>keys[e.key]=true);
-document.addEventListener("keyup",e=>keys[e.key]=false);
-canvas.addEventListener("touchmove",e=>{
-    e.preventDefault();
-    const t=e.touches[0],rect=canvas.getBoundingClientRect();
-    const tx=(t.clientX-rect.left)*(canvas.width/rect.width);
-    paddle.x=tx-paddle.w/2;
-    paddle.x=Math.max(0,Math.min(canvas.width-paddle.w,paddle.x));
-})
-function updateBrick(){
-    if(keys["ArrowLeft"]) paddle.x=Math.max(0,paddle.x-paddle.speed);
-    if(keys["ArrowRight"]) paddle.x=Math.min(canvas.width-paddle.w,paddle.x+paddle.speed);
-    ball.x+=ball.dx;ball.y+=ball.dy;
-    if(ball.x-ball.r<=0||ball.x+ball.r>=canvas.width) ball.dx*=-1;
-    if(ball.y-ball.r<=0) ball.dy*=-1;
-    if(ball.y+ball.r>=paddle.y&&ball.x>=paddle.x&&ball.x<=paddle.x+paddle.w) ball.dy=-Math.abs(ball.dy);
-    if(ball.y+ball.r>canvas.height){resetBrick();return;}
-    for(let b of blocks){
-        if(!b.alive) continue;
-        if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){
-            b.alive=false;ball.dy*=-1;score++;scoreDom.textContent=score;
-        }
-    }
-    if(blocks.every(x=>!x.alive)) resetBrick();
-}
-function drawBrick(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="#4fc3f7";ctx.fillRect(paddle.x,paddle.y,paddle.w,paddle.h);
-    ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fillStyle="#ffeb3b";ctx.fill();
-    for(let b of blocks){if(b.alive){ctx.fillStyle="#f06292";ctx.fillRect(b.x,b.y,b.w,b.h);}}
-}
-function resetBrick(){
-    ball.x=canvas.width/2;ball.y=canvas.height/2;ball.dx=4;ball.dy=-4;
-    paddle.x=canvas.width/2-paddle.w/2;score=0;scoreDom.textContent=score;initBlocks();
-}
-function loopBrick(){updateBrick();drawBrick();requestAnimationFrame(loopBrick);}
-initBlocks();loopBrick();
-}
-
-// =====================游戏2：贪吃蛇=====================
-{
-const canvas=document.getElementById("snake-canvas");
-const ctx=canvas.getContext("2d");
-const scoreDom=document.getElementById("snake-score");
-const grid=20;
-let snake=[{x:10,y:10}];
-let dir={x:1,y:0};
-let food={x:15,y:10};
-let score=0;
-let touchStartX=0,touchStartY=0;
-
-canvas.addEventListener("touchstart",e=>{
-    touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;
-})
-canvas.addEventListener("touchend",e=>{
-    const dx=e.changedTouches[0].clientX-touchStartX;
-    const dy=e.changedTouches[0].clientY-touchStartY;
-    if(Math.abs(dx)>Math.abs(dy)){
-        if(dx>30&&dir.x!=-1) dir={x:1,y:0};
-        else if(dx<-30&&dir.x!=1) dir={x:-1,y:0};
-    }else{
-        if(dy>30&&dir.y!=-1) dir={x:0,y:1};
-        else if(dy<-30&&dir.y!=1) dir={x:0,y:-1};
-    }
-})
-document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowUp"&&dir.y!==1) dir={x:0,y:-1};
-    if(e.key==="ArrowDown"&&dir.y!==-1) dir={x:0,y:1};
-    if(e.key==="ArrowLeft"&&dir.x!==1) dir={x:-1,y:0};
-    if(e.key==="ArrowRight"&&dir.x!==-1) dir={x:1,y:0};
-})
-function resetSnake(){
-    snake=[{x:10,y:10}];dir={x:1,y:0};score=0;scoreDom.textContent=score;randomFood();
-}
-function randomFood(){
-    food.x=Math.floor(Math.random()*(canvas.width/grid));
-    food.y=Math.floor(Math.random()*(canvas.height/grid));
-}
-function stepSnake(){
-    const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-    if(head.x<0||head.y<0||head.x>=canvas.width/grid||head.y>=canvas.height/grid){resetSnake();return;}
-    for(let s of snake) if(s.x===head.x&&s.y===head.y){resetSnake();return;}
-    snake.unshift(head);
-    if(head.x===food.x&&head.y===food.y){score++;scoreDom.textContent=score;randomFood();}else snake.pop();
-}
-function drawSnake(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="#4fc3f7";
-    for(let s of snake) ctx.fillRect(s.x*grid,s.y*grid,grid-1,grid-1);
-    ctx.fillStyle="#ff5722";
-    ctx.fillRect(food.x*grid,food.y*grid,grid-1,grid-1);
-}
-setInterval(()=>{stepSnake();drawSnake();},140);
-randomFood();
-}
-
-// =====================游戏3：2048=====================
-{
-const gridEl=document.getElementById("grid2048");
-const scoreDom=document.getElementById("score2048");
-let grid=[];
-let score=0;
-function buildDom(){
-    gridEl.innerHTML="";
-    for(let r=0;r<4;r++)for(let c=0;c<4;c++){
-        const d=document.createElement("div");
-        d.className="cell";
-        d.textContent=grid[r][c]||"";
-        gridEl.appendChild(d);
-    }
-    scoreDom.textContent=score;
-}
-function addRandom(){
-    const empty=[];
-    for(let r=0;r<4;r++)for(let c=0;c<4;c++) if(!grid[r][c]) empty.push({r,c});
-    if(empty.length===0) return;
-    const p=empty[Math.floor(Math.random()*empty.length)];
-    grid[p.r][p.c]=Math.random()>0.8?4:2;
-}
-function init2048(){
-    grid=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
-    score=0;addRandom();addRandom();buildDom();
-}
-function slide(row){
-    let arr=row.filter(x=>x!==0);
-    for(let i=0;i<arr.length-1;i++){
-        if(arr[i]===arr[i+1]){arr[i]*=2;score+=arr[i];arr[i+1]=0;}
-    }
-    arr=arr.filter(x=>x!==0);
-    while(arr.length<4) arr.push(0);
-    return arr;
-}
-function moveLeft(){for(let i=0;i<4;i++) grid[i]=slide(grid[i]);}
-function rotate(){
-    const ng=[[],[],[],[]];
-    for(let r=0;r<4;r++)for(let c=0;c<4;c++) ng[c][3-r]=grid[r][c];
-    grid=ng;
-}
-function move(dir){
-    let before=JSON.stringify(grid);
-    if(dir==="left") moveLeft();
-    if(dir==="right"){rotate();rotate();moveLeft();rotate();rotate();}
-    if(dir==="up"){rotate();rotate();rotate();moveLeft();rotate();}
-    if(dir==="down"){rotate();moveLeft();rotate();rotate();rotate();}
-    if(before!==JSON.stringify(grid)){addRandom();buildDom();}
-}
-document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowLeft") move("left");
-    if(e.key==="ArrowRight") move("right");
-    if(e.key==="ArrowUp") move("up");
-    if(e.key==="ArrowDown") move("down");
-})
-let sx=0,sy=0;
-gridEl.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;})
-gridEl.addEventListener("touchend",e=>{
-    const dx=e.changedTouches[0].clientX-sx;
-    const dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)>Math.abs(dy)){
-        if(dx>40) move("right");else if(dx<-40) move("left");
-    }else{
-        if(dy>40) move("down");else if(dy<-40) move("up");
-    }
-})
-document.getElementById("reset2048").onclick=init2048;
-init2048();
-}
-
-// =====================游戏4：接球=====================
-{
-const canvas=document.getElementById("catch-canvas");
-const ctx=canvas.getContext("2d");
-const scoreDom=document.getElementById("catch-score");
-const paddle={w:100,h:14,x:canvas.width/2-50,y:canvas.height-20};
-let balls=[];
-let score=0;
-canvas.addEventListener("touchmove",e=>{
-    e.preventDefault();
-    const t=e.touches[0],rect=canvas.getBoundingClientRect();
-    const tx=(t.clientX-rect.left)*(canvas.width/rect.width);
-    paddle.x=tx-paddle.w/2;
-    paddle.x=Math.max(0,Math.min(canvas.width-paddle.w,paddle.x));
-})
-const keys={};
-document.addEventListener("keydown",e=>keys[e.key]=true);
-document.addEventListener("keyup",e=>keys[e.key]=false);
-function spawnBall(){
-    balls.push({x:Math.random()*(canvas.width-20)+10,y:0,r:8,speed:2+Math.random()*2});
-}
-function resetCatch(){balls=[];score=0;scoreDom.textContent=score;}
-function updateCatch(){
-    if(keys["ArrowLeft"]) paddle.x=Math.max(0,paddle.x-6);
-    if(keys["ArrowRight"]) paddle.x=Math.min(canvas.width-paddle.w,paddle.x+6);
-    if(Math.random()<0.025) spawnBall();
-    for(let i=balls.length-1;i>=0;i--){
-        const b=balls[i];
-        b.y+=b.speed;
-        if(b.y+b.r>paddle.y&&b.x>paddle.x&&b.x<paddle.x+paddle.w){
-            score++;scoreDom.textContent=score;balls.splice(i,1);continue;
-        }
-        if(b.y-b.r>canvas.height){balls.splice(i,1);}
-    }
-}
-function drawCatch(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="#4fc3f7";ctx.fillRect(paddle.x,paddle.y,paddle.w,paddle.h);
-    ctx.fillStyle="#ffeb3b";
-    for(let b of balls){ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();}
-}
-setInterval(()=>{updateCatch();drawCatch();},30);
-resetCatch();
-}
-
-// =====================游戏5：消方块=====================
-{
-const canvas=document.getElementById("match-canvas");
-const ctx=canvas.getContext("2d");
-const scoreDom=document.getElementById("match-score");
-const cell=50;
-const cols=8,rows=7;
-const colors=["#e74c3c","#2ecc71","#3498db","#f1c40f","#9b59b6"];
-let grid=[];
-let score=0;
-function initMatch(){
-    score=0;scoreDom.textContent=score;
-    grid=[];
-    for(let r=0;r<rows;r++){
-        const row=[];
-        for(let c=0;c<cols;c++) row.push(Math.floor(Math.random()*colors.length));
-        grid.push(row);
-    }
-}
-function flood(r,c,color,visited){
-    if(r<0||c<0||r>=rows||c>=cols) return [];
-    if(visited[r][c]) return [];
-    if(grid[r][c]!==color) return [];
-    visited[r][c]=true;
-    let res=[{r,c}];
-    res=res.concat(flood(r+1,c,color,visited));
-    res=res.concat(flood(r-1,c,color,visited));
-    res=res.concat(flood(r,c+1,color,visited));
-    res=res.concat(flood(r,c-1,color,visited));
-    return res;
-}
-canvas.addEventListener("click",e=>{
-    const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left;
-    const y=e.clientY-rect.top;
-    const c=Math.floor(x/cell);
-    const r=Math.floor(y/cell);
-    if(r>=rows||c>=cols) return;
-    const visited=Array.from({length:rows},()=>Array(cols).fill(false));
-    const list=flood(r,c,grid[r][c],visited);
-    if(list.length>=2){
-        score+=list.length*10;scoreDom.textContent=score;
-        for(let p of list) grid[p.r][p.c]=-1;
-        for(let cc=0;cc<cols;cc++){
-            let arr=[];
-            for(let rr=rows-1;rr>=0;rr--) if(grid[rr][cc]!==-1) arr.push(grid[rr][cc]);
-            while(arr.length<rows) arr.push(-1);
-            for(let rr=0;rr<rows;rr++) grid[rows-1-rr][cc]=arr[rr];
-        }
-    }
-})
-function drawMatch(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for(let r=0;r<rows;r++){
-        for(let c=0;c<cols;c++){
-            const v=grid[r][c];
-            if(v===-1) continue;
-            ctx.fillStyle=colors[v];
-            ctx.fillRect(c*cell+2,r*cell+2,cell-4,cell-4);
-        }
-    }
-}
-setInterval(drawMatch,40);
-initMatch();
-}
 </script>
 </body>
 </html>
