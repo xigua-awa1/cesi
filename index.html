@@ -2,43 +2,49 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial‑scale=1.0">
     <title>蟑螂</title>
     <style>
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            box-sizing: border‑box;
         }
         body {
             background:#000;
-            min-height:100vh;
+            min‑height:100vh;
             overflow:hidden;
         }
         .cockroach{
             position:fixed;
-            z-index:999;
-            font-size:28px;
-            user-select:none;
-            pointer-events:none;
+            z‑index:999;
+            user‑select:none;
+            pointer‑events:none;
         }
     </style>
 </head>
 <body>
 <script>
-const count = 12;
+// 蟑螂数量
+const count = 35;
+// 移动速度
+const speed = 2.8;
+// 蟑螂字体大小
+const size = 36;
+
 const roaches = [];
 for(let i=0;i<count;i++){
     const el = document.createElement("div");
     el.className = "cockroach";
     el.innerText = "🪳";
+    el.style.fontSize = size + "px";
     document.body.appendChild(el);
     roaches.push({
         dom:el,
         x:Math.random() * window.innerWidth,
         y:Math.random() * window.innerHeight,
-        vx:(Math.random()-0.5)*2.2,
-        vy:(Math.random()-0.5)*2.2
+        vx:(Math.random()-0.5)*speed,
+        vy:(Math.random()-0.5)*speed
     })
 }
 
@@ -48,8 +54,8 @@ function loopRoach(){
     for(let r of roaches){
         r.x += r.vx;
         r.y += r.vy;
-        if(r.x <0 || r.x> w-30) r.vx *= -1;
-        if(r.y <0 || r.y> h-30) r.vy *= -1;
+        if(r.x <0 || r.x> w‑size) r.vx *= -1;
+        if(r.y <0 || r.y> h‑size) r.vy *= -1;
         r.dom.style.left = r.x + "px";
         r.dom.style.top = r.y + "px";
         r.dom.style.transform = r.vx>0 ? "scaleX(1)" : "scaleX(-1)";
