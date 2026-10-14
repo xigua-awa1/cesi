@@ -1,266 +1,536 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>15关闯关小游戏</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>跑酷小游戏</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#111;overflow:hidden;touch-action:none}
-#gameBox{
-    position:relative;
-    width:100vw;
-    height:100vh;
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#0b1020;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-canvas{display:block;background:#1a1a2e}
-
-/* UI */
-#info{
-    position:fixed;top:12px;left:12px;color:#fff;font-size:18px;z-index:10;text-shadow:0 0 4px #000;
+canvas{
+  touch-action:none;
+  max-width:100%;
+  max-height:100vh;
+  background:#16213e;
 }
-#tip{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    background:rgba(0,0,0,0.85);color:#fff;padding:24px 40px;border-radius:12px;
-    font-size:22px;z-index:20;text-align:center;display:none;
+#btnDown{
+  position:fixed;
+  right:20px;
+  bottom:30px;
+  width:72px;
+  height:72px;
+  background:rgba(255,255,255,0.2);
+  color:#fff;
+  font-size:34px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,0.45);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  user-select:none;
+  -webkit-user-select:none;
 }
-#tip button{
-    margin-top:14px;padding:8px 22px;font-size:17px;border:none;border-radius:6px;background:#2196F3;color:#fff;
-}
-
-/* 手机虚拟方向按键 */
-#dpad{
-    position:fixed;bottom:20px;left:20px;z-index:15;display:grid;
-    grid-template-columns:65px 65px 65px;grid-template-rows:65px 65px 65px;gap:4px;
-}
-#dpad button{
-    border:none;border-radius:8px;background:rgba(255,255,255,0.22);color:#fff;font-size:26px;
-}
-#dpad .empty{background:transparent;pointer-events:none}
-
-@media (min-width:768px){
-    #dpad{display:none;} /*电脑隐藏虚拟按键*/
+#btnDown:active{
+  background:rgba(255,255,255,0.35);
 }
 </style>
 </head>
 <body>
-<div id="gameBox">
-    <canvas id="cv"></canvas>
-    <div id="info">关卡：1 / 15</div>
-    <div id="tip">
-        <div id="tipText"></div>
-        <button id="tipBtn">继续</button>
-    </div>
-    <div id="dpad">
-        <div class="empty"></div>
-        <button data-key="up">↑</button>
-        <div class="empty"></div>
-        <button data-key="left">←</button>
-        <div class="empty"></div>
-        <button data-key="right">→</button>
-        <div class="empty"></div>
-        <button data-key="down">↓</button>
-        <div class="empty"></div>
-    </div>
-</div>
+<canvas id="game"></canvas>
+<div id="btnDown">↓</div>
 
 <script>
-const canvas = document.getElementById('cv');
+const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-let w,h;
+const btnDown = document.getElementById('btnDown');
 
-// 玩家小球
-const player = {
-    x:50,y:50,r:14,speed:4,
-    vx:0,vy:0
-}
+let bestScore = Number(localStorage.getItem("parkourBest")) || 0;
 
-let currentLevel = 0;
-// 15关数据：walls墙[{x,y,w,h}], start起点{x,y}, goal终点{x,y,r}
-const levels = [
-//1
-{walls:[{x:120,y:80,w:180,h:12}], start:{x:40,y:40}, goal:{x:480,y:320,r:18}},
-//2
-{walls:[{x:100,y:60,w:12,h:180},{x:240,y:140,w:180,h:12}], start:{x:40,y:40}, goal:{x:480,y:340,r:18}},
-//3
-{walls:[{x:80,y:50,w:220,h:12},{x:80,y:180,w:12,h:160},{x:220,y:220,w:240,h:12}], start:{x:40,y:40}, goal:{x:480,y:340,r:18}},
-//4
-{walls:[{x:60,y:40,w:12,h:220},{x:180,y:120,w:12,h:220},{x:320,y:40,w:12,h:220}], start:{x:30,y:30}, goal:{x:460,y:300,r:18}},
-//5
-{walls:[{x:50,y:60,w:300,h:12},{x:120,y:130,w:12,h:180},{x:260,y:80,w:12,h:220}], start:{x:30,y:30}, goal:{x:470,y:330,r:18}},
-//6
-{walls:[{x:40,y:40,w:14,h:240},{x:160,y:120,w:180,h:14},{x:340,y:40,w:14,h:220}], start:{x:20,y:30}, goal:{x:470,y:320,r:18}},
-//7
-{walls:[{x:70,y:70,w:200,h:12},{x:70,y:70,w:12,h:160},{x:220,y:180,w:220,h:12},{x:380,y:80,w:12,h:160}], start:{x:30,y:30}, goal:{x:470,y:330,r:18}},
-//8
-{walls:[{x:50,y:50,w:12,h:260},{x:140,y:100,w:12,h:200},{x:240,y:60,w:12,h:220},{x:340,y:100,w:12,h:200}], start:{x:25,y:30}, goal:{x:470,y:320,r:18}},
-//9
-{walls:[{x:60,y:60,w:280,h:12},{x:60,y:60,w:12,h:140},{x:180,y:160,w:12,h:160},{x:300,y:100,w:12,h:180}], start:{x:30,y:30}, goal:{x:470,y:330,r:18}},
-//10
-{walls:[{x:40,y:40,w:12,h:280},{x:130,y:80,w:160,h:12},{x:130,y:180,w:12,h:140},{x:270,y:120,w:160,h:12}], start:{x:20,y:30}, goal:{x:470,y:330,r:18}},
-//11
-{walls:[{x:50,y:50,w:320,h:12},{x:50,y:50,w:12,h:180},{x:160,y:140,w:12,h:200},{x:280,y:80,w:12,h:220},{x:400,y:120,w:12,h:180}], start:{x:25,y:30}, goal:{x:480,y:340,r:18}},
-//12
-{walls:[{x:60,y:60,w:12,h:240},{x:150,y:120,w:220,h:12},{x:150,y:220,w:12,h:140},{x:290,y:80,w:12,h:180},{x:400,y:160,w:120,h:12}], start:{x:30,y:30}, goal:{x:480,y:340,r:18}},
-//13
-{walls:[{x:40,y:40,w:12,h:300},{x:120,y:90,w:12,h:220},{x:220,y:50,w:12,h:240},{x:320,y:90,w:12,h:220},{x:420,y:50,w:12,h:240}], start:{x:20,y:30}, goal:{x:480,y:330,r:18}},
-//14
-{walls:[{x:50,y:50,w:340,h:12},{x:50,y:50,w:12,h:200},{x:140,y:130,w:12,h:220},{x:240,y:70,w:12,h:240},{x:340,y:130,w:12,h:200}], start:{x:25,y:30}, goal:{x:480,y:340,r:18}},
-//15
-{walls:[{x:40,y:40,w:12,h:320},{x:110,y:70,w:180,h:12},{x:110,y:170,w:12,h:180},{x:230,y:110,w:180,h:12},{x:230,y:210,w:12,h:140},{x:350,y:150,w:120,h:12},{x:350,y:250,w:12,h:100}], start:{x:20,y:30}, goal:{x:480,y:340,r:18}}
-];
-
-let keys = {up:false,down:false,left:false,right:false};
-let showDialog = false;
-let dialogText = "";
-
-// 适配画布大小
 function resize(){
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = w;
-    canvas.height = h;
+  const w = Math.min(window.innerWidth, 920);
+  const h = Math.min(window.innerHeight, 620);
+  canvas.width = w;
+  canvas.height = h;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const game = {
+  score: 0,
+  over: false,
+  speed: 4,
+  baseSpeed: 4,
+  maxSpeed: 14.5,
+  speedIncreasePerScore: 0.0042
+};
+
+const player = {
+  x: 140,
+  y: 200,
+  w: 28,
+  h: 36,
+  vy: 0,
+  bumpBouncePower: -15,
+  jumpPower: -13.2,
+  fastFallPower: 14.5,
+  gravity: 0.52,
+  onGround: false
+};
+
+let platforms = [];
+let bumps = [];
+let mountains = [];
+let solidBlocks = [];
+let clouds = [];
+let stars = [];
+let slopes = [];
+
+function rectCollide(a, b){
+  return a.x < b.x + b.w &&
+         a.x + a.w > b.x &&
+         a.y < b.y + b.h &&
+         a.y + a.h > b.y;
 }
 
-//加载关卡
-function loadLevel(idx){
-    const lv = levels[idx];
-    player.x = lv.start.x;
-    player.y = lv.start.y;
-    player.vx = 0; player.vy =0;
-    document.getElementById('info').innerText = `关卡：${idx+1} / 15`;
+function spawnStar(){
+  stars.push({
+    x: canvas.width + Math.random()*200,
+    y: Math.random() * canvas.height*0.65,
+    r: Math.random()*1.4+0.4,
+    speed: 0.15 + Math.random()*0.25
+  });
 }
 
-//圆形矩形碰撞
-function circleRectCollision(cx,cy,r,rx,ry,rw,rh){
-    let nearX = Math.max(rx, Math.min(cx, rx+rw));
-    let nearY = Math.max(ry, Math.min(cy, ry+rh));
-    let dx = cx - nearX;
-    let dy = cy - nearY;
-    return (dx*dx+dy*dy) < r*r;
+function spawnCloud(px){
+  clouds.push({
+    x: px,
+    y: 40 + Math.random()*160,
+    w:70 + Math.random()*110,
+    h:24 + Math.random()*36,
+    speed:0.22 + Math.random()*0.28
+  });
 }
 
-//更新游戏逻辑
-function update(){
-    if(showDialog) return;
-    const lv = levels[currentLevel];
+function slopeBounds(s){
+  return { x: Math.min(s.x1, s.x2), y: Math.min(s.y1, s.y2), w: Math.abs(s.x2 - s.x1), h: Math.abs(s.y2 - s.y1) };
+}
 
-    player.vx=0; player.vy=0;
-    if(keys.up) player.vy = -player.speed;
-    if(keys.down) player.vy = player.speed;
-    if(keys.left) player.vx = -player.speed;
-    if(keys.right) player.vx = player.speed;
+function slopeConflicts(s){
+  const b = slopeBounds(s);
+  for(let blk of solidBlocks){
+    if(rectCollide(b, blk)) return true;
+  }
+  for(let p of bumps){
+    if(rectCollide(b, p)) return true;
+  }
+  return false;
+}
 
-    let nx = player.x + player.vx;
-    let ny = player.y + player.vy;
+function updateSlopeCollision(){
+  for(let s of slopes){
+    const dx = s.x2 - s.x1;
+    const dy = s.y2 - s.y1;
+    const footX = player.x + player.w / 2;
+    const footY = player.y + player.h;
 
-    //墙壁碰撞
-    for(let wall of lv.walls){
-        if(circleRectCollision(nx, player.y, player.r, wall.x,wall.y,wall.w,wall.h)){
-            nx = player.x;
-        }
-        if(circleRectCollision(player.x, ny, player.r, wall.x,wall.y,wall.w,wall.h)){
-            ny = player.y;
-        }
+    if(footX < s.x1 || footX > s.x2) continue;
+
+    const t = (footX - s.x1) / dx;
+    const slopeY = s.y1 + dy * t;
+
+    if(player.vy >= 0 && footY <= slopeY + 6 && footY >= slopeY - 18){
+      player.y = slopeY - player.h;
+      player.vy = 0;
+      player.onGround = true;
     }
-
-    //边界
-    nx = Math.max(player.r, Math.min(w-player.r, nx));
-    ny = Math.max(player.r, Math.min(h-player.r, ny));
-
-    player.x = nx;
-    player.y = ny;
-
-    //检测到达终点
-    const g = lv.goal;
-    const dist = Math.hypot(player.x-g.x, player.y-g.y);
-    if(dist < player.r + g.r){
-        nextLevel();
-    }
+  }
 }
 
-function nextLevel(){
-    currentLevel++;
-    if(currentLevel >= levels.length){
-        showMessage("🎉恭喜！通关全部15关！","重新开始");
-        currentLevel = 0;
+function handleSolidBlockCollision(){
+  for(let blk of solidBlocks){
+    if(!rectCollide(player, blk)) continue;
+
+    const overlapLeft  = (player.x + player.w) - blk.x;
+    const overlapRight = (blk.x + blk.w) - player.x;
+    const overlapTop   = (player.y + player.h) - blk.y;
+    const overlapBot   = (blk.y + blk.h) - player.y;
+
+    const minX = Math.min(overlapLeft, overlapRight);
+    const minY = Math.min(overlapTop, overlapBot);
+
+    if(minX < minY){
+      if(overlapLeft < overlapRight){
+        player.x = blk.x - player.w;
+      }else{
+        player.x = blk.x + blk.w;
+      }
     }else{
-        showMessage(`✅第${currentLevel}关完成！`,`进入第${currentLevel+1}关`);
+      if(overlapTop < overlapBot){
+        player.y = blk.y - player.h;
+        player.vy = 0;
+        player.onGround = true;
+      }else{
+        player.y = blk.y + blk.h;
+        player.vy = Math.max(player.vy,0);
+      }
     }
+  }
 }
 
-function showMessage(text,btnText){
-    showDialog = true;
-    dialogText = text;
-    document.getElementById("tipText").innerText = text;
-    document.getElementById("tipBtn").innerText = btnText;
-    document.getElementById("tip").style.display = "block";
+function generateBlockHill(platform){
+  const hillBaseX = platform.x + platform.w * 0.55;
+  const hillTopCount = 2 + Math.floor(Math.random() * 3);
+  const blockSize = 34;
+
+  for(let layer = 0; layer < hillTopCount; layer++){
+    const countInLayer = hillTopCount - layer;
+    const layerY = platform.y - blockSize * (layer + 1);
+
+    for(let i = 0; i < countInLayer; i++){
+      const bx = hillBaseX + i * blockSize - ((countInLayer - 1) * blockSize) / 2;
+      solidBlocks.push({
+        x: bx,
+        y: layerY,
+        w: blockSize,
+        h: blockSize
+      });
+    }
+  }
 }
 
-document.getElementById("tipBtn").onclick = ()=>{
-    showDialog = false;
-    document.getElementById("tip").style.display = "none";
-    loadLevel(currentLevel);
-}
+function initMap(){
+  platforms = [];
+  bumps = [];
+  mountains = [];
+  solidBlocks = [];
+  clouds = [];
+  stars = [];
+  slopes = [];
 
-//渲染
-function render(){
-    ctx.clearRect(0,0,w,h);
-    const lv = levels[currentLevel];
+  player.x = 140;
+  player.y = 200;
+  player.vy = 0;
+  player.onGround = false;
 
-    //绘制墙
-    ctx.fillStyle="#4466aa";
-    for(let wall of lv.walls){
-        ctx.fillRect(wall.x,wall.y,wall.w,wall.h);
+  game.score = 0;
+  game.speed = game.baseSpeed;
+  game.over = false;
+
+  platforms.push({ x: 0, y: canvas.height - 80, w: 440, h: 22 });
+
+  let lastX = 400;
+  for(let i = 0; i < 12; i++){
+    const maxVerticalDelta = 135;
+    const prevPlatform = platforms[platforms.length - 1];
+    const baseY = prevPlatform.y;
+    const py = Math.max(100, Math.min(canvas.height - 60, baseY + (Math.random()*maxVerticalDelta*2 - maxVerticalDelta)));
+
+    const gap = 72 + Math.random() * 75;
+    const pw = 82 + Math.random() * 105;
+    platforms.push({ x: lastX + gap, y: py, w: pw, h: 22 });
+
+    // 降低黄色弹簧生成概率
+    if(Math.random() < 0.12){
+      bumps.push({
+        x: lastX + gap + pw / 2 - 14,
+        y: py - 24,
+        w: 28,
+        h: 24
+      });
     }
 
-    //终点绿色圆
-    ctx.beginPath();
-    ctx.arc(lv.goal.x, lv.goal.y, lv.goal.r,0,Math.PI*2);
-    ctx.fillStyle="#39d353";
-    ctx.fill();
+    if(Math.random() < 0.22){
+      generateBlockHill({ x: lastX + gap, y: py, w: pw });
+    }
 
-    //玩家小球
+    if(Math.random() < 0.28){
+      const sx1 = lastX + gap + 6 + Math.random() * 20;
+      const sx2 = sx1 + 70 + Math.random() * 70;
+      const topY = py - 30 - Math.random() * 40;
+      const bottomY = py;
+      const slope = { x1: sx1, y1: topY, x2: sx2, y2: bottomY };
+      if(!slopeConflicts(slope)) slopes.push(slope);
+    }
+
+    if(Math.random() > 0.38){
+      mountains.push({
+        x: lastX + gap + Math.random()*pw,
+        height: 85 + Math.random()*170,
+        width: 125 + Math.random()*190
+      });
+    }
+    if(Math.random()>0.55) spawnCloud(lastX+gap);
+    lastX = lastX + gap + pw;
+  }
+  for(let s=0;s<25;s++) spawnStar();
+}
+
+function generateMore(){
+  const rightMost = Math.max(...platforms.map(p => p.x + p.w));
+  while(rightMost < canvas.width + 650){
+    const last = platforms[platforms.length - 1];
+    const maxVerticalDelta = 135;
+    const baseY = last.y;
+    const py = Math.max(100, Math.min(canvas.height - 60, baseY + (Math.random()*maxVerticalDelta*2 - maxVerticalDelta)));
+
+    const gapDifficulty = Math.min(game.score * 0.021, 38);
+    const gap = 76 + Math.random() * 72 + gapDifficulty;
+    const pw = 78 + Math.random() * 102;
+
+    platforms.push({
+      x: last.x + last.w + gap,
+      y: py,
+      w: pw,
+      h: 22
+    });
+
+    // 随分数缓慢提升，上限压低，减少黄色方块
+    const bumpRate = Math.min(0.12 + game.score * 0.00012, 0.22);
+    if(Math.random() < bumpRate){
+      bumps.push({
+        x: last.x + last.w + gap + pw / 2 - 14,
+        y: py - 24,
+        w: 28,
+        h: 24
+      });
+    }
+
+    if(Math.random() < 0.24){
+      generateBlockHill({ x: last.x + last.w + gap, y: py, w: pw });
+    }
+
+    if(Math.random() < 0.32){
+      const sx1 = last.x + last.w + gap + 6 + Math.random() * 20;
+      const sx2 = sx1 + 70 + Math.random() * 70;
+      const topY = py - 30 - Math.random() * 40;
+      const bottomY = py;
+      const slope = { x1: sx1, y1: topY, x2: sx2, y2: bottomY };
+      if(!slopeConflicts(slope)) slopes.push(slope);
+    }
+
+    if(Math.random()>0.38){
+      mountains.push({
+        x: last.x + last.w + gap + Math.random()*pw,
+        height:85 + Math.random()*170,
+        width:125 + Math.random()*190
+      });
+    }
+    if(Math.random()>0.52) spawnCloud(last.x+last.w+gap);
+    if(Math.random()>0.65) spawnStar();
+    break;
+  }
+}
+
+function jump(){
+  if(game.over) return;
+  if(player.onGround){
+    player.vy = player.jumpPower;
+    player.onGround = false;
+  }
+}
+
+function fastFall(){
+  if(game.over) return;
+  player.vy = player.fastFallPower;
+  player.onGround = false;
+}
+
+window.addEventListener('keydown', e => {
+  if(e.code === 'Space') {e.preventDefault(); jump();}
+  if(e.code === 'KeyS') fastFall();
+});
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if(game.over){
+    initMap();
+  }else{
+    jump();
+  }
+});
+canvas.addEventListener('mousedown', () => {
+  if(game.over){
+    initMap();
+  }else{
+    jump();
+  }
+});
+
+btnDown.addEventListener('touchstart', e => {
+  e.preventDefault();
+  fastFall();
+});
+btnDown.addEventListener('mousedown', fastFall);
+
+function update(){
+  if(game.over) return;
+
+  game.score += 0.15;
+  game.speed = game.baseSpeed + game.score * game.speedIncreasePerScore;
+  if(game.speed > game.maxSpeed) game.speed = game.maxSpeed;
+
+  player.vy += player.gravity;
+  player.y += player.vy;
+  player.onGround = false;
+
+  for(let p of platforms) p.x -= game.speed;
+  for(let b of bumps) b.x -= game.speed;
+  for(let blk of solidBlocks) blk.x -= game.speed;
+  for(let s of slopes){ s.x1 -= game.speed; s.x2 -= game.speed; }
+  for(let m of mountains) m.x -= game.speed * 0.34;
+  for(let c of clouds) c.x -= c.speed;
+  for(let s of stars) s.x -= s.speed;
+
+  platforms = platforms.filter(p => p.x + p.w > -30);
+  bumps = bumps.filter(b => b.x + b.w > -30);
+  solidBlocks = solidBlocks.filter(blk => blk.x + blk.w > -40);
+  slopes = slopes.filter(s => s.x2 > -40);
+  mountains = mountains.filter(m => m.x + m.width > -80);
+  clouds = clouds.filter(c => c.x + c.w > -60);
+  stars = stars.filter(s => s.x > -20);
+
+  generateMore();
+
+  for(let p of platforms){
+    if(rectCollide(player, p)){
+      if(player.vy > 0 && player.y + player.h - player.vy <= p.y + 5){
+        player.y = p.y - player.h;
+        player.vy = 0;
+        player.onGround = true;
+      }
+    }
+  }
+
+  updateSlopeCollision();
+
+  // 修改：只要碰到黄色弹簧方块任意部位就触发弹跳，不再限定从上方落下
+  for(let b of bumps){
+    if(rectCollide(player, b)){
+      player.vy = player.bumpBouncePower;
+      player.onGround = false;
+    }
+  }
+
+  handleSolidBlockCollision();
+
+  if(player.y > canvas.height + 50){
+    game.over = true;
+    if(game.score > bestScore){
+      bestScore = Math.floor(game.score);
+      localStorage.setItem("parkourBest",bestScore);
+    }
+  }
+}
+
+function draw(){
+  const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0,"#0c1433");
+  grad.addColorStop(1,"#142042");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle="#ffffff";
+  for(let s of stars){
     ctx.beginPath();
-    ctx.arc(player.x,player.y,player.r,0,Math.PI*2);
-    ctx.fillStyle="#ff5555";
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
     ctx.fill();
+  }
+
+  ctx.fillStyle="rgba(255,255,255,0.08)";
+  for(let c of clouds){
+    ctx.fillRect(c.x,c.y,c.w,c.h);
+  }
+
+  ctx.fillStyle="#1e2c4c";
+  for(let m of mountains){
+    ctx.beginPath();
+    ctx.moveTo(m.x, canvas.height);
+    ctx.lineTo(m.x + m.width/2, canvas.height - m.height);
+    ctx.lineTo(m.x + m.width, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#5a7fa8';
+  for(let s of slopes){
+    ctx.beginPath();
+    ctx.moveTo(s.x1, s.y1);
+    ctx.lineTo(s.x2, s.y2);
+    ctx.lineTo(s.x2, s.y2 + 18);
+    ctx.lineTo(s.x1, s.y1 + 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#8cb3d9';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(s.x1, s.y1);
+    ctx.lineTo(s.x2, s.y2);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle="#0f3460";
+  for(let p of platforms){
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle="#215088";
+    ctx.fillRect(p.x,p.y,p.w,4);
+    ctx.fillStyle="#0f3460";
+  }
+
+  for(let blk of solidBlocks){
+    ctx.fillStyle="#365a8b";
+    ctx.fillRect(blk.x,blk.y,blk.w,blk.h);
+    ctx.strokeStyle="#547cad";
+    ctx.lineWidth=2;
+    ctx.strokeRect(blk.x,blk.y,blk.w,blk.h);
+  }
+
+  ctx.fillStyle="#facc15";
+  for(let b of bumps){
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.fillStyle="#fde047";
+    ctx.fillRect(b.x,b.y,b.w,5);
+    ctx.fillStyle="#facc15";
+  }
+
+  ctx.fillStyle="#22e5e5";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+
+  ctx.fillStyle="#ffffff";
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`分数：${Math.floor(game.score)}`, 22, 32);
+  ctx.fillText(`速度：${game.speed.toFixed(1)}`, 22, 58);
+  ctx.fillText(`最高分：${bestScore}`,22,84);
+
+  if(game.over){
+    ctx.fillStyle = '#ff5566';
+    ctx.font = 'bold 40px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 40);
+
+    ctx.fillStyle="#ffffff";
+    ctx.font='22px sans-serif';
+    ctx.fillText(`本次得分：${Math.floor(game.score)}`,canvas.width/2,canvas.height/2);
+    ctx.fillText(`历史最高：${bestScore}`,canvas.width/2,canvas.height/2+30);
+    ctx.font='19px sans-serif';
+    ctx.fillText('点击屏幕 / 空格键重新开始', canvas.width / 2, canvas.height / 2 + 65);
+  }
 }
 
 function loop(){
-    update();
-    render();
-    requestAnimationFrame(loop);
+  update();
+  draw();
+  requestAnimationFrame(loop);
 }
 
-//键盘监听电脑
-window.addEventListener("keydown",e=>{
-    switch(e.key.toLowerCase()){
-        case "w":case "arrowup": keys.up=true;break;
-        case "s":case "arrowdown": keys.down=true;break;
-        case "a":case "arrowleft": keys.left=true;break;
-        case "d":case "arrowright": keys.right=true;break;
-    }
-})
-window.addEventListener("keyup",e=>{
-    switch(e.key.toLowerCase()){
-        case "w":case "arrowup": keys.up=false;break;
-        case "s":case "arrowdown": keys.down=false;break;
-        case "a":case "arrowleft": keys.left=false;break;
-        case "d":case "arrowright": keys.right=false;break;
-    }
-})
-
-//手机虚拟按键
-const dpadBtns = document.querySelectorAll("#dpad button");
-dpadBtns.forEach(btn=>{
-    const k = btn.dataset.key;
-    btn.addEventListener("touchstart",(e)=>{e.preventDefault();keys[k]=true})
-    btn.addEventListener("touchend",(e)=>{e.preventDefault();keys[k]=false})
-})
-
-window.addEventListener("resize",resize);
-resize();
-loadLevel(0);
+initMap();
 loop();
 </script>
 </body>
